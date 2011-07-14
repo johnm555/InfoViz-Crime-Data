@@ -1,0 +1,28 @@
+#fig {
+  width: 800px;
+  height: 450px;
+}
+
+#container {
+  height: 10px;
+}
+
+#yearSlider {
+  position: absolute;
+  left: 100;
+  right: 90;
+  margin-top: 3;
+}
+
+#yearLabel {
+  position: absolute;
+  left: 0;
+  width: 85;
+  text-align: right;
+}
+
+#play {
+  position: absolute;
+  right: 50px;
+  cursor: pointer;
+}
