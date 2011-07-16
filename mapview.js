@@ -16,14 +16,34 @@ var scale = zoomscale(w,h);
 var crange = pv.Scale.linear(0, .4, 1).range("#FAF8CC", "red", "#C11B17");
 var cdotrange = pv.Scale.linear(0, .4, 1).range("#E0FFFF", "blue", "#151B54");
 var countrydotrange = pv.Scale.linear(0, .4, 1).range("#CCFFCC", "green", "#003300");
-
+var countrydots,zoomeddots;
 var filters = {
     'medinc': {
         label: 'Medium Income',
         min: 100000,
         max: 0,
-        range: [0,0]
-    }   
+        range: [0,0],
+        includes: function(c){
+            if (c.medIncome>=filters['medinc'].range[0] &&
+                    c.medIncome<=filters['medinc'].range[1]){
+               return true;    
+            }
+            return false;
+        }
+    },
+    'pop': {
+        label: 'Population',
+        min: 100000,
+        max: 0,
+        range: [0,0],
+        includes: function(c){
+            if (c.population>=filters['pop'].range[0] &&
+                    c.population<=filters['pop'].range[1]){
+               return true;    
+            }
+            return false;
+        }
+    }
 }
 
 function setupMap(){
@@ -52,28 +72,60 @@ function processData(){
 }
 
 function initFilters(){
-    for (var i=0;i<vcdata;i++){
+    for (var i=0;i<vcdata.length;i++){
         var d = vcdata[i];
+        d.medIncome=d.medIncome*100000;
+        d.population=d.population*100000;
         if (d.medIncome<filters['medinc'].min){
             filters['medinc'].min = d.medIncome;
         }
         if (d.medIncome>filters['medinc'].max){
             filters['medinc'].max = d.medIncome;
         }
+        if (d.population<filters['pop'].min){
+            filters['pop'].min = d.population;
+        }
+        if (d.population>filters['pop'].max){
+            filters['pop'].max = d.population;
+        }
     }
     filters['medinc'].range = [filters['medinc'].min,filters['medinc'].max];
-    $( "#medinc-range" ).slider({
-        range: true,
-        min: filters['medinc'].min,
-        max: filters['medinc'].max,
-        values: [ filters['medinc'].range[0], filters['medinc'].range[1] ],
-        slide: function( event, ui ) {
-            //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
-        }
-    });
-    //$( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) +
-    //    " - $" + $( "#slider-range" ).slider( "values", 1 ) );
+    filters['pop'].range = [filters['pop'].min,filters['pop'].max];
+    console.log("medinc range: "+filters['medinc'].range);
+    var filterdelayed=-1;
+    function createSlider(prefix){
+        $( "#"+prefix+"-range" ).slider({
+            range: true,
+            min: filters[prefix].min,
+            max: filters[prefix].max,
+            values: [ filters[prefix].range[0], filters[prefix].range[1] ],
+            slide: function( event, ui ) {
+                $( "#"+prefix ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+                filters[prefix].range[0]=ui.values[0];
+                filters[prefix].range[1]=ui.values[1];
+                if (filterdelayed!=-1) clearTimeout(filterdelayed);
+                filterdelayed = setTimeout(function(){
+                    countrydots.render();
+                    if (zoomedidx>-1)
+                        zoomeddots.render();
+                },300);
+            }
+        });
+        $( "#"+prefix ).val( $( "#"+prefix+"-range" ).slider( "values", 0 ) +
+                " - " + $( "#"+prefix+"-range" ).slider( "values", 1 ) );
+    }
+    createSlider('medinc');
+    createSlider('pop');
+	
+	
 }   
+function testWithFilters(c){
+    for (var f in filters){
+        if (!filters[f].includes(c))
+            return false;
+    }
+    return true;
+}
 function normalFillStyle(d, l, c) {
     var sc = statecrime[states.indexOf(c.name)];
     if (sc){
@@ -104,15 +156,16 @@ function createVisualization(){
     //Add a dot for each city we have data for
     //Encode the violent crimes rate in the size and color of each dot
     //Add the click even listener to show details on demand
-    var pie = vis.add(pv.Dot)
+    countrydots = vis.add(pv.Dot)
         .data(vcdata)
         .left(function(c) {return scale(c).x})
         .top(function(c) {return scale(c).y})
-        .size(function(c) {return c.ViolentCrimesPerPop * 30})
+        .size(function(c) {return c.population/100000 * 60})
         .fillStyle(function(c) {return cdotrange(c.ViolentCrimesPerPop)})
         .strokeStyle("black")
         .title(function(c) {return c.name})
-        .event("click",oncityclick);
+        .event("click",oncityclick)
+        .visible(testWithFilters);
     
     vis.render();
 }
@@ -180,12 +233,12 @@ function zoomState(statedata){
             drawCloseButton(ovis,bnds,offsetx,offsety);
             ovis.render();
         });
-    
 }
 function hideoverlay(){
     $("#overlay").empty();
-    $("#overlay-container").hide();
+    $("#overlay-container").fadeOut('fast');
     $("#dod").fadeOut('fast');
+    zoomedidx = -2;
 }
 function drawCloseButton(ovis,bnds,offsetx,offsety){
     //Draw close button
@@ -259,15 +312,16 @@ function animateState(rootvis, data, endoffsetx, endoffsety, fill,onclick,callba
         if (vcdata[i].state == zoomedidx)
             scdata.push(vcdata[i]);
     }
-    var pie = rootvis.add(pv.Dot)
+    zoomeddots = rootvis.add(pv.Dot)
         .data(scdata)
         .left(function(c) {return zc().x(c)+offsetx})
         .top(function(c) {return zc().y(c)+offsety})
-        .size(function(c) {return c.ViolentCrimesPerPop * 30 * 3})
+        .size(function(c) {return c.population/100000 * 30 * 3})
         .fillStyle(function(c) {return cdotrange(c.ViolentCrimesPerPop)})
         .strokeStyle("black")
         .title(function(c) {return c.name})
-        .event("click",oncityclick);
+        .event("click",oncityclick)
+        .visible(testWithFilters);
         
     function animate(){
         curw+=wstep; curh+=hstep;
@@ -306,7 +360,7 @@ function addState(rootvis, data, scaler, offsetx, offsety, fill,onclick){
         .strokeStyle("white")
         .antialias(false);
         
-        // Add a label with the state code in the middle of every state
+    // Add a label with the state code in the middle of every state
     rootvis.add(pv.Label)
         .data(data)
         .left(function(c) {return scaler(c.centLatLon).x+offsetx})

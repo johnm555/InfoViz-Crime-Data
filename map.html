@@ -27,9 +27,15 @@
 <body onload="initialize()">
     This is the infoviz project
   <div id="filters">
-    <span>
-        Medium Income:
-        <div id="medinc-range"></div>
+    <span class="filter">
+        <label for="medinc">Medium Income:</label>
+    	<input type="text" id="medinc" style="border:0; color:#f6931f; font-weight:bold;" />
+        <div id="medinc-range" class="filter-range"></div>
+    </span>
+    <span class="filter">
+        <label for="pop">Population:</label>
+    	<input type="text" id="pop" style="border:0; color:#f6931f; font-weight:bold;" />
+        <div id="pop-range"class="filter-range"></div>
     </span>
   </div>
   <div id="viscontainer">

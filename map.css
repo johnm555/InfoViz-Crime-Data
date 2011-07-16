@@ -28,6 +28,11 @@
   text-align: right;
 }
 
+.filter-range{
+    width: 940px;
+    margin-left: 20px;
+}
+
 #play {
   position: absolute;
   right: 50px;
