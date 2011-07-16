@@ -13,29 +13,39 @@
 <script type="text/javascript" src="us_lowres.js"></script>
 <script type="text/javascript" src="us_stats.js"></script>
 <script type="text/javascript" src="data.js"></script>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 <script type="text/javascript"
     src="http://maps.google.com/maps/api/js?sensor=false"></script>
 
 <script src="map.js"></script>
 <script src="dod.js"></script>
+
+<link type="text/css" href="jqueryui/css/ui-lightness/jquery-ui-1.8.14.custom.css" rel="Stylesheet" />	
+<!--<script type="text/javascript" src="jqueryui/js/jquery-1.5.1.min.js"></script>-->
+<script type="text/javascript" src="jqueryui/js/jquery-ui-1.8.14.custom.min.js"></script>
 </head>
 <body onload="initialize()">
     This is the infoviz project
+  <div id="filters">
+    <div id="medinc-range"></div>
+  </div>
   <div id="viscontainer">
-      <div id="fig">
-        <script type="text/javascript" src="mapview.js">
-    
-    
-        </script>
+      <div id="mapcontainer">
+          <div id="fig">
+            <script type="text/javascript" src="mapview.js">
+        
+        
+            </script>
+          </div>
       </div>
       <div id="dod">
-        <h1 class="city-state"/>
+        <h1 class="city-state"></h1>
         <div id="pie1"></div>
       </div>
   </div>
-  <div id="overlay-shade"></div>
-  <div id="overlay"></div>
-  <div id="data-box"></div>
+  <div id="overlay-container">
+      <div id="overlay-shade"></div>
+      <div id="overlay"></div>
+  </div>
   </body>
 </html>

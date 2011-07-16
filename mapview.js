@@ -1,11 +1,11 @@
-var w = 810,
-    h = 400,
+var w = 1000,
+    h = 500,
     rScale = 1 / 170;
 var statecrime=[];
 var maxvc;
 var zoomed=null;
 var zoomedidx=-1;
-
+var zoomscalefactor=2.5;
 var zoomscale = function(width,height){
     return pv.Geo.scale()
         .domain({lng: -128, lat: 24}, {lng: -64, lat: 50})
@@ -17,8 +17,18 @@ var crange = pv.Scale.linear(0, .4, 1).range("#FAF8CC", "red", "#C11B17");
 var cdotrange = pv.Scale.linear(0, .4, 1).range("#E0FFFF", "blue", "#151B54");
 var countrydotrange = pv.Scale.linear(0, .4, 1).range("#CCFFCC", "green", "#003300");
 
+var filters = {
+    'medinc': {
+        label: 'Medium Income',
+        min: 100000,
+        max: 0,
+        range: [0,0]
+    }   
+}
+
 function setupMap(){
     processData();
+    initFilters();
     createVisualization();
 }
 
@@ -40,7 +50,29 @@ function processData(){
       c.centLatLon = centroid(c.borders[0]);
     });
 }
-
+function initFilters(){
+    for (var i=0;i<vcdata;i++){
+        var d = vcdata[i];
+        if (d.medIncome<filters['medinc'].min){
+            filters['medinc'].min = d.medIncome;
+        }
+        if (d.medIncome>filters['medinc'].max){
+            filters['medinc'].max = d.medIncome;
+        }
+    }
+    filters['medinc'].range = [filters['medinc'].min,filters['medinc'].max];
+    $( "#medinc-range" ).slider({
+        range: true,
+        min: filters['medinc'].min,
+        max: filters['medinc'].max,
+        values: [ filters['medinc'].range[0], filters['medinc'].range[1] ],
+        slide: function( event, ui ) {
+            //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+        }
+    });
+    //$( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) +
+    //    " - $" + $( "#slider-range" ).slider( "values", 1 ) );
+}   
 function createVisualization(){
     // Add the main panel
     var vis = new pv.Panel()
@@ -106,13 +138,13 @@ function zoomState(statedata){
 
     if (zoomed){
         $("#overlay").empty();
-//        $("#overlay").show().fadeTo(0,0).fadeIn("slow");
-        
     }
-    $("#overlay").show().fadeOut(0).fadeIn(1000);
+    $("#overlay-container").show();
+    $("#overlay-shade").fadeOut(0).fadeTo(1000,.5);
+    $("#overlay").fadeOut(0).fadeIn(1000);
     
     zoomedidx = states.indexOf(statedata.name)+1;
-    var zsc = zoomscale(w*2,h*2);
+    var zsc = zoomscale(w*zoomscalefactor,h*zoomscalefactor);
     
     var bnds = computeBounds(statedata.borders,zsc);
     console.log("minx: "+bnds.minx+" maxx: "+bnds.maxx+" miny: "+bnds.miny+" maxy: "+bnds.maxy);
@@ -121,6 +153,7 @@ function zoomState(statedata){
     
     console.log("scaler: "+zsc+" - "+zsc.x);
     
+
     var ovis = new pv.Panel().canvas("overlay")
         .width(w)
         .height(h)
@@ -150,7 +183,8 @@ function zoomState(statedata){
     
 }
 function hideoverlay(){
-    $("#overlay").hide().empty();
+    $("#overlay").empty();
+    $("#overlay-container").hide();
 }
 function drawCloseButton(ovis,bnds,offsetx,offsety){
     //Draw close button
@@ -188,7 +222,7 @@ function animateState(rootvis, data, endoffsetx, endoffsety, fill,onclick,callba
         .event("click", onclick);
     
     var steps = 12;
-    var curw=w, curh=h, maxw=2*w, maxh=2*h;
+    var curw=w, curh=h, maxw=zoomscalefactor*w, maxh=zoomscalefactor*h;
     var wstep = (maxw-curw)/steps;
     var hstep = (maxh-curh)/steps;
     var offsetxstep = (endoffsetx-offsetx)/steps;
@@ -284,6 +318,7 @@ function addState(rootvis, data, scaler, offsetx, offsety, fill,onclick){
 }
 
 setupMap();
+
 addEventListener("load",function(){
-    $("#overlay").hide();
+    $("#overlay-container").hide();
 },false);
