@@ -15,21 +15,25 @@
 <script type="text/javascript" src="data.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
 <script type="text/javascript"
-    src="http://maps.google.com/maps/api/js?sensor=false">
-
-</script>
-</script>
+    src="http://maps.google.com/maps/api/js?sensor=false"></script>
 
 <script src="map.js"></script>
+<script src="dod.js"></script>
 </head>
 <body onload="initialize()">
     This is the infoviz project
-  <div id="center"><div id="fig">
-    <script type="text/javascript" src="mapview.js">
-
-
-    </script>
-  </div></div>
+  <div id="viscontainer">
+      <div id="fig">
+        <script type="text/javascript" src="mapview.js">
+    
+    
+        </script>
+      </div>
+      <div id="dod">
+        <h1 class="city-state">
+      </div>
+  </div>
+  <div id="overlay"></div>
   <div id="data-box"></div>
   </body>
 </html>

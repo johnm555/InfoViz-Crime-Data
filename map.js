@@ -9,7 +9,6 @@ var scale, color;
 
 function initialize(){
     console.log("map init");
-    //loadData();
 }
 
 function loadData(){
