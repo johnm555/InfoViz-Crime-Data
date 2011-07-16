@@ -50,6 +50,7 @@ function processData(){
       c.centLatLon = centroid(c.borders[0]);
     });
 }
+
 function initFilters(){
     for (var i=0;i<vcdata;i++){
         var d = vcdata[i];
@@ -107,7 +108,7 @@ function createVisualization(){
         .left(function(c) {return scale(c).x})
         .top(function(c) {return scale(c).y})
         .size(function(c) {return c.ViolentCrimesPerPop * 30})
-        .fillStyle(function(c) {return countrydotrange(c.ViolentCrimesPerPop)})
+        .fillStyle(function(c) {return cdotrange(c.ViolentCrimesPerPop)})
         .strokeStyle("black")
         .title(function(c) {return c.name})
         .event("click",oncityclick);

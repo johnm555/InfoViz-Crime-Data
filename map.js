@@ -88,31 +88,7 @@ function updateData(line, callback){
             callback();
     });
 }
-function addPieChart(locs){
-    //console.log("loc: "+loc.name+" lat: "+loc.lat+" lng: "+loc.lng);
-    // Add the pie chart
-    var pie = vis.add(pv.Panel)
-        .data(locs)
-        .left(function(c) {return scale(c).x})
-        .top(function(c) {return scale(c).y})
-    
-      .add(pv.Wedge)
-        .data(function(c) {return [
-            30,30,40
-            //(100 - us_stats[c.code].over[us_stats.yearIdx(year)]
-            // - us_stats[c.code].obese[us_stats.yearIdx(year)]),
-            //us_stats[c.code].over[us_stats.yearIdx(year)],
-            //us_stats[c.code].obese[us_stats.yearIdx(year)]
-          ]})
-        .left(0)
-        .top(0)
-        .outerRadius(function(d, c) {return Math.sqrt(
-            .5)*20} )//us_stats[c.code].pop[us_stats.yearIdx(year)]
-        .angle(function(d) {return d /100 * 2 * Math.PI})
-        .fillStyle(function() {return colors[this.index]})
-        .title(function(d, c) {return c.name});
-    console.log("chart added?: "+us_lowres[0].name);
-}
+
 function parseName(name,state){
     //Sommersettown
     //Humblecity
