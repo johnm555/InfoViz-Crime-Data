@@ -23,6 +23,7 @@ function setupMap(){
 }
 
 function processData(){
+    // Find the average violent crimes for each state, used in state's color
     vcdata.forEach(function(item){
         var vc = parseFloat(item.ViolentCrimesPerPop);
         var state = item.state-1;
@@ -48,27 +49,27 @@ function createVisualization(){
         .top(30)
         .bottom(20);
 
+    //Draw all of the states.
+    //Set the fill color to be based on the violent crimes
     addState(vis, us_lowres, scale, 0, 0,
-    function normalfillstyle(d, l, c) {
+        function normalfillstyle(d, l, c) {
             var sc = statecrime[states.indexOf(c.name)];
             if (sc){
-                //console.log("state: "+c.name+" vc: "+sc.vc);
                 return crange(sc.vc);
-                //return col(sc.vc*100);
             }
             else {//We have no data for cities in this state, so it was not created
-                //console.log("sc undefined: "+c.name);
-                return crange(0);//col(0);
+                return crange(0);
             }
         },
         function normalstateclick(c) {
-            console.log(c);
             console.log("Name: "+c.name+" idx: "+states.indexOf(c.name));
             zoomState(c);
         }
     );
     
-    
+    //Add a dot for each city we have data for
+    //Encode the violent crimes rate in the size and color of each dot
+    //Add the click even listener to show details on demand
     var pie = vis.add(pv.Dot)
         .data(vcdata)
         .left(function(c) {return scale(c).x})
@@ -90,7 +91,7 @@ function computeBounds(borders, scalers){
             var b = borders[i][j];
             var x = scalers.x(b);
             var y = scalers.y(b);
-            console.log("x: "+x+" y: "+y);
+            //console.log("x: "+x+" y: "+y);
             if (x<bnds.minx) bnds.minx = x;
             if (y<bnds.miny) bnds.miny = y;
             if (x>bnds.maxx) bnds.maxx = x;
@@ -105,9 +106,10 @@ function zoomState(statedata){
 
     if (zoomed){
         $("#overlay").empty();
-        $("#overlay").show();
-        //zoomed.visible(false);
+//        $("#overlay").show().fadeTo(0,0).fadeIn("slow");
+        
     }
+    $("#overlay").show().fadeOut(0).fadeIn(1000);
     
     zoomedidx = states.indexOf(statedata.name)+1;
     var zsc = zoomscale(w*2,h*2);
@@ -125,6 +127,7 @@ function zoomState(statedata){
         .top(30)
         .bottom(20);
     
+    /*
     zoomed = addState(ovis,[statedata],zsc, offsetx, offsety,
         function(){
             return "gray";
@@ -132,45 +135,122 @@ function zoomState(statedata){
         function(c){
             console.log("Namee: "+c.name+" idx: "+states.indexOf(c.name));
         });
-        
-    var scdata = [];
-    for (var i=0;i<vcdata.length;i++){
-        //console.log("zidx: "+zoomedidx+" state: "+vcdata[i].state);
-        if (vcdata[i].state == zoomedidx)
-            scdata.push(vcdata[i]);
-    }
-    var pie = ovis.add(pv.Dot)
-        .data(scdata)
-        .left(function(c) {return zsc.x(c)+offsetx})
-        .top(function(c) {return zsc.y(c)+offsety})
-        .size(function(c) {return c.ViolentCrimesPerPop * 30 * 3})
-        .fillStyle(function(c) {return cdotrange(c.ViolentCrimesPerPop)})
-        .strokeStyle("black")
-        .title(function(c) {return c.name})
-        .event("click",oncityclick);
+    */
+    zoomed = animateState(ovis,[statedata], offsetx, offsety,
+        function(){
+            return "gray";
+        },
+        function(c){
+            console.log("Namee: "+c.name+" idx: "+states.indexOf(c.name));
+        },
+        function acallback(){
+            drawCloseButton(ovis,bnds,offsetx,offsety);
+            ovis.render();
+        });
     
+}
+function hideoverlay(){
+    $("#overlay").hide().empty();
+}
+function drawCloseButton(ovis,bnds,offsetx,offsety){
+    //Draw close button
     var closesize=150,closesize2=15;
+    
     var close = ovis.add(pv.Dot)
         .left(function(){return bnds.minx+offsetx;})
         .top(function(){return bnds.miny+offsety;})
         .size(function(){return closesize})
         .fillStyle(function(){return "orange";})
         .strokeStyle("white")
-        .event("click",function(){
-            $("#overlay").hide().empty();
-        }).add(pv.Line)
+        .event("click",hideoverlay).add(pv.Line)
             .data([[bnds.minx+offsetx-closesize2/2,bnds.miny+offsety-closesize2/2],
                    [bnds.minx+offsetx+closesize2/2,bnds.miny+offsety+closesize2/2]])
-            .top(function(d) {console.log("t: "+d);return d[1]})
-            .left(function(d) {console.log("l: "+d);return d[0]})
+            .top(function(d) {return d[1]})
+            .left(function(d) {return d[0]})
+            .event("click",hideoverlay)
         .add(pv.Line)
             .data([[bnds.minx+offsetx+closesize2/2,bnds.miny+offsety-closesize2/2],
                    [bnds.minx+offsetx-closesize2/2,bnds.miny+offsety+closesize2/2]])
-            .top(function(d) {console.log("t: "+d);return d[1]})
-            .left(function(d) {console.log("l: "+d);return d[0]});;
-    
-    ovis.render();
+            .top(function(d) {return d[1]})
+            .left(function(d) {return d[0]})
+            .event("click",hideoverlay);
 }
+function animateState(rootvis, data, endoffsetx, endoffsety, fill,onclick,callback){
+    var scaler, offsetx=0, offsety=0;
+    
+    scaler = zoomscale(w,h);
+    function zc(){
+        return scaler;
+    }
+    // Add a panel for each state
+    var state = rootvis.add(pv.Panel)
+        .data(data)
+        .event("click", onclick);
+    
+    var steps = 12;
+    var curw=w, curh=h, maxw=2*w, maxh=2*h;
+    var wstep = (maxw-curw)/steps;
+    var hstep = (maxh-curh)/steps;
+    var offsetxstep = (endoffsetx-offsetx)/steps;
+    var offsetystep = (endoffsety-offsety)/steps;
+    
+    console.log("steps set");
+    
+    // Add a panel for each state land mass
+    state.add(pv.Panel)
+        .data(function(c) {return c.borders;})
+      .add(pv.Line)
+        .data(function(l) {return l;})
+        .left(function(l){return zc().x(l)+offsetx})
+        .top(function(l){return zc().y(l)+offsety})
+        .fillStyle(fill)
+        .lineWidth(1)
+        .strokeStyle("white")
+        .antialias(false);
+        
+        // Add a label with the state code in the middle of every state
+    rootvis.add(pv.Label)
+        .data(data)
+        .left(function(c) {return zc()(c.centLatLon).x+offsetx})
+        .top(function(c) {return zc()(c.centLatLon).y+offsety})
+        .text(function(c) {return c.code})
+        .textAlign("center")
+        .textBaseline("middle");
+            
+    //Draw dots for each city
+    var scdata = [];
+    for (var i=0;i<vcdata.length;i++){
+        //console.log("zidx: "+zoomedidx+" state: "+vcdata[i].state);
+        if (vcdata[i].state == zoomedidx)
+            scdata.push(vcdata[i]);
+    }
+    var pie = rootvis.add(pv.Dot)
+        .data(scdata)
+        .left(function(c) {return zc().x(c)+offsetx})
+        .top(function(c) {return zc().y(c)+offsety})
+        .size(function(c) {return c.ViolentCrimesPerPop * 30 * 3})
+        .fillStyle(function(c) {return cdotrange(c.ViolentCrimesPerPop)})
+        .strokeStyle("black")
+        .title(function(c) {return c.name})
+        .event("click",oncityclick);
+        
+    function animate(){
+        curw+=wstep; curh+=hstep;
+        offsetx+=offsetxstep;
+        offsety+=offsetystep;
+        scaler = zoomscale(curw,curh);
+    
+        rootvis.render();
+        if (curw<maxw){
+            setTimeout(animate,50);
+        } else {
+            callback();
+        }
+    }
+    animate();
+    return state;
+}
+
 
 function addState(rootvis, data, scaler, offsetx, offsety, fill,onclick){
 

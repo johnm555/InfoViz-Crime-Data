@@ -33,11 +33,12 @@
   cursor: pointer;
 }
 
-#overlay{
+#overlay,#overlay-shade{
     position: relative;
     top: -450px;
     width: 810px;
     height: 400px;
-
 }
-
+#overlay-shade{
+    background-color: black;
+}
