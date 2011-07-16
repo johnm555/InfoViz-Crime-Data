@@ -8,6 +8,7 @@
     background-color: gray;
     float: left;
     height: 600px;
+    display: none;
 }
 #container {
   height: 10px;

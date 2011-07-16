@@ -74,6 +74,15 @@ function initFilters(){
     //$( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) +
     //    " - $" + $( "#slider-range" ).slider( "values", 1 ) );
 }   
+function normalFillStyle(d, l, c) {
+    var sc = statecrime[states.indexOf(c.name)];
+    if (sc){
+        return crange(sc.vc);
+    }
+    else {//We have no data for cities in this state, so it was not created
+        return crange(0);
+    }
+}
 function createVisualization(){
     // Add the main panel
     var vis = new pv.Panel()
@@ -85,21 +94,13 @@ function createVisualization(){
     //Draw all of the states.
     //Set the fill color to be based on the violent crimes
     addState(vis, us_lowres, scale, 0, 0,
-        function normalfillstyle(d, l, c) {
-            var sc = statecrime[states.indexOf(c.name)];
-            if (sc){
-                return crange(sc.vc);
-            }
-            else {//We have no data for cities in this state, so it was not created
-                return crange(0);
-            }
-        },
+        normalFillStyle,
         function normalstateclick(c) {
             console.log("Name: "+c.name+" idx: "+states.indexOf(c.name));
             zoomState(c);
         }
     );
-    
+
     //Add a dot for each city we have data for
     //Encode the violent crimes rate in the size and color of each dot
     //Add the click even listener to show details on demand
@@ -171,9 +172,7 @@ function zoomState(statedata){
         });
     */
     zoomed = animateState(ovis,[statedata], offsetx, offsety,
-        function(){
-            return "gray";
-        },
+        normalFillStyle,
         function(c){
             console.log("Namee: "+c.name+" idx: "+states.indexOf(c.name));
         },
@@ -186,6 +185,7 @@ function zoomState(statedata){
 function hideoverlay(){
     $("#overlay").empty();
     $("#overlay-container").hide();
+    $("#dod").fadeOut('fast');
 }
 function drawCloseButton(ovis,bnds,offsetx,offsety){
     //Draw close button

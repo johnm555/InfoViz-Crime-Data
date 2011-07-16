@@ -10,6 +10,8 @@ function oncityclick(data){
         zoomState(statedata);
     }
 
+    $("#dod").fadeIn('fast');
+    
     var loc = data.Location;
     var names = loc.split(", ");
     $(".city-state").html(loc);
