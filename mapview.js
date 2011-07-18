@@ -19,8 +19,8 @@ var cdotrange = pv.Scale.linear(0, .4, 1).range("#E0FFFF", "blue", "#151B54");
 var countrydotrange = pv.Scale.linear(0, .4, 1).range("#CCFFCC", "green", "#003300");
 var countrydots,zoomeddots;
 
-
-
+var selectedcity="";
+var mapvis;
 var filters = {
     'medinc': {
         label: 'Medium Income',
@@ -51,27 +51,35 @@ var filters = {
 }
 
 function setupMap(){
-    processData();
     initFilters();
+    processData();
     createVisualization();
 }
 
 function processData(){
-    // Find the average violent crimes for each state, used in state's color
-    vcdata.forEach(function(item){
-        var vc = parseFloat(item.ViolentCrimesPerPop);
-        var state = item.state-1;
-        if (statecrime[state]){
-            statecrime[state].vc = (statecrime[state].vc*statecrime[state].tot
-                + vc)/(++statecrime[state].tot);
-        } else {
-            statecrime[state] = {vc: parseFloat(vc), tot: 1};
-        }
-    });
+    calculateStateCrime();
+    
     // Find the centroid for each state
     us_lowres.forEach(function(c) {
       c.code = c.code.toUpperCase();
       c.centLatLon = centroid(c.borders[0]);
+    });
+}
+
+function calculateStateCrime(){
+    // Find the average violent crimes for each state, used in state's color
+    statecrime = [];
+    vcdata.forEach(function(item){
+        if (testWithFilters(item)){
+            var vc = parseFloat(item.ViolentCrimesPerPop);
+            var state = item.state-1;
+            if (statecrime[state]){
+                statecrime[state].vc = (statecrime[state].vc*statecrime[state].tot
+                    + vc)/(++statecrime[state].tot);
+            } else {
+                statecrime[state] = {vc: parseFloat(vc), tot: 1};
+            }
+        } 
     });
 }
 
@@ -109,9 +117,12 @@ function initFilters(){
                 filters[prefix].range[1]=ui.values[1];
                 if (filterdelayed!=-1) clearTimeout(filterdelayed);
                 filterdelayed = setTimeout(function(){
-                    countrydots.render();
+                    calculateStateCrime();
+                    mapvis.render();
+                    //countrydots.render();
                     if (zoomedidx>-1)
                         zoomeddots.render();
+                    
                 },300);
             }
         });
@@ -141,7 +152,8 @@ function normalFillStyle(d, l, c) {
 }
 function createVisualization(){
     // Add the main panel
-    var vis = new pv.Panel()
+   var vis;
+   mapvis = vis = new pv.Panel()
         .width(w)
         .height(h)
         .top(30)
@@ -166,7 +178,7 @@ function createVisualization(){
         .top(function(c) {return scale(c).y})
         .size(function(c) {return c.population/100000 * 60})
         .fillStyle(function(c) {return cdotrange(c.ViolentCrimesPerPop)})
-        .strokeStyle("black")
+        .strokeStyle(function(c){return (c.Location==selectedcity)?"yellow":"black"})
         .title(function(c) {return c.name})
         .event("click",oncityclick)
         .visible(testWithFilters);
@@ -243,6 +255,7 @@ function hideoverlay(){
     $("#overlay-container").fadeOut('fast');
     $("#dod").fadeOut('fast');
     zoomedidx = -2;
+    selectedcity = "";
 }
 function drawCloseButton(ovis,bnds,offsetx,offsety){
     //Draw close button
@@ -322,7 +335,7 @@ function animateState(rootvis, data, endoffsetx, endoffsety, fill,onclick,callba
         .top(function(c) {return zc().y(c)+offsety})
         .size(function(c) {return c.population/100000 * 30 * 3})
         .fillStyle(function(c) {return cdotrange(c.ViolentCrimesPerPop)})
-        .strokeStyle("black")
+        .strokeStyle(function(c){return (c.Location==selectedcity)?"yellow":"black"})
         .title(function(c) {return c.name})
         .event("click",oncityclick)
         .visible(testWithFilters);
