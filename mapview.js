@@ -13,10 +13,14 @@ var zoomscale = function(width,height){
 }; 
 var scale = zoomscale(w,h);
 
-var crange = pv.Scale.linear(0, .4, 1).range("#FAF8CC", "red", "#C11B17");
+var crange = pv.Scale.linear(0, .6, 1).range("#FAF8CC", "red", "#660000");
+//var crange = pv.Scale.linear(0, 1).range("#FF9999", "red");
 var cdotrange = pv.Scale.linear(0, .4, 1).range("#E0FFFF", "blue", "#151B54");
 var countrydotrange = pv.Scale.linear(0, .4, 1).range("#CCFFCC", "green", "#003300");
 var countrydots,zoomeddots;
+
+
+
 var filters = {
     'medinc': {
         label: 'Medium Income',
@@ -91,7 +95,7 @@ function initFilters(){
     }
     filters['medinc'].range = [filters['medinc'].min,filters['medinc'].max];
     filters['pop'].range = [filters['pop'].min,filters['pop'].max];
-    console.log("medinc range: "+filters['medinc'].range);
+
     var filterdelayed=-1;
     function createSlider(prefix){
         $( "#"+prefix+"-range" ).slider({
