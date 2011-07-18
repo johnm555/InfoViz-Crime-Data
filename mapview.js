@@ -105,14 +105,14 @@ function initFilters(){
     filters['pop'].range = [filters['pop'].min,filters['pop'].max];
 
     var filterdelayed=-1;
-    function createSlider(prefix){
+    function createSlider(prefix,vp){
         $( "#"+prefix+"-range" ).slider({
             range: true,
             min: filters[prefix].min,
             max: filters[prefix].max,
             values: [ filters[prefix].range[0], filters[prefix].range[1] ],
             slide: function( event, ui ) {
-                $( "#"+prefix ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+                $( "#"+prefix ).val( vp + ui.values[ 0 ] + " - "+vp + ui.values[ 1 ] );
                 filters[prefix].range[0]=ui.values[0];
                 filters[prefix].range[1]=ui.values[1];
                 if (filterdelayed!=-1) clearTimeout(filterdelayed);
@@ -129,8 +129,8 @@ function initFilters(){
         $( "#"+prefix ).val( $( "#"+prefix+"-range" ).slider( "values", 0 ) +
                 " - " + $( "#"+prefix+"-range" ).slider( "values", 1 ) );
     }
-    createSlider('medinc');
-    createSlider('pop');
+    createSlider('medinc',"$");
+    createSlider('pop',"");
 	
 	
 }   
@@ -219,6 +219,8 @@ function zoomState(statedata){
     
     var bnds = computeBounds(statedata.borders,zsc);
     console.log("minx: "+bnds.minx+" maxx: "+bnds.maxx+" miny: "+bnds.miny+" maxy: "+bnds.maxy);
+    
+    
     var offsetx=w/2-(bnds.maxx-bnds.minx)/2-bnds.minx;
     var offsety=h/2-(bnds.maxy-bnds.miny)/2-bnds.miny;
     
