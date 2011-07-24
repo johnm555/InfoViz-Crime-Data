@@ -11,6 +11,8 @@ function initialize(){
     console.log("map init");
 }
 
+//Load data from file and process it, making sure names are ok
+//Used to add City, State and lat,lng to data
 function loadData(){
 //    var url = "http://archive.ics.uci.edu/ml/machine-learning-databases/communities/communities.data";
     var url = "processed.data";//"communities.data";
@@ -57,6 +59,7 @@ function loadData(){
         }
     });
 }
+//Update name and add in lat,lng info
 function updateData(line, callback){
     var info = line.split(/,/);
     //if (info[0]!=55){
@@ -88,13 +91,14 @@ function updateData(line, callback){
             callback();
     });
 }
-
+//Convert name from UCI formatting to standard english representation
 function parseName(name,state){
+    //Examples of city names before processing:
     //Sommersettown
     //Humblecity
     //NewBrittentown
     //Wyckofftownship
-    //console.log("nammme: "+name);
+
     name = name.replace(/township$/,"")
                .replace(/town$/,"")
                .replace(/city$/,"")
@@ -112,6 +116,7 @@ function parseName(name,state){
     return name;
     
 }
+//Load lat long saved in data
 function loadLatLng(info, callback){
     var latlng = new google.maps.LatLng(info[4],info[5]);
     //map.setCenter(latlng);
@@ -122,6 +127,7 @@ function loadLatLng(info, callback){
     //});
     callback(info[4],info[5]);
 }
+//Lookup data with Google's maps api
 function lookupLatLong(name, callback){
     //console.log("latlong lookup");
     geocoder.geocode( { 'address': name}, function(results, status) {
@@ -145,6 +151,7 @@ function lookupLatLong(name, callback){
     });
 }
 
+//The data lists states based on their index in this list of states
 var states = [
 "Alabama",
 "Alaska",
@@ -203,4 +210,5 @@ var states = [
 "Wisconsin",
 "Wyoming"
 ];
+//Header for data file, used when converting from csv style to javascript's object format
 var header = ["Location","state","county","community","communityname","lat","lng","fold","population","householdsize","racepctblack","racePctWhite","racePctAsian","racePctHisp","agePct12t21","agePct12t29","agePct16t24","agePct65up","numbUrban","pctUrban","medIncome","pctWWage","pctWFarmSelf","pctWInvInc","pctWSocSec","pctWPubAsst","pctWRetire","medFamInc","perCapInc","whitePerCap","blackPerCap","indianPerCap","AsianPerCap","OtherPerCap","HispPerCap","NumUnderPov","PctPopUnderPov","PctLess9thGrade","PctNotHSGrad","PctBSorMore","PctUnemployed","PctEmploy","PctEmplManu","PctEmplProfServ","PctOccupManu","PctOccupMgmtProf","MalePctDivorce","MalePctNevMarr","FemalePctDiv","TotalPctDiv","PersPerFam","PctFam2Par","PctKids2Par","PctYoungKids2Par","PctTeen2Par","PctWorkMomYoungKids","PctWorkMom","NumIlleg","PctIlleg","NumImmig","PctImmigRecent","PctImmigRec5","PctImmigRec8","PctImmigRec10","PctRecentImmig","PctRecImmig5","PctRecImmig8","PctRecImmig10","PctSpeakEnglOnly","PctNotSpeakEnglWell","PctLargHouseFam","PctLargHouseOccup","PersPerOccupHous","PersPerOwnOccHous","PersPerRentOccHous","PctPersOwnOccup","PctPersDenseHous","PctHousLess3BR","MedNumBR","HousVacant","PctHousOccup","PctHousOwnOcc","PctVacantBoarded","PctVacMore6Mos","MedYrHousBuilt","PctHousNoPhone","PctWOFullPlumb","OwnOccLowQuart","OwnOccMedVal","OwnOccHiQuart","RentLowQ","RentMedian","RentHighQ","MedRent","MedRentPctHousInc","MedOwnCostPctInc","MedOwnCostPctIncNoMtg","NumInShelters","NumStreet","PctForeignBorn","PctBornSameState","PctSameHouse85","PctSameCity85","PctSameState85","LemasSwornFT","LemasSwFTPerPop","LemasSwFTFieldOps","LemasSwFTFieldPerPop","LemasTotalReq","LemasTotReqPerPop","PolicReqPerOffic","PolicPerPop","RacialMatchCommPol","PctPolicWhite","PctPolicBlack","PctPolicHisp","PctPolicAsian","PctPolicMinor","OfficAssgnDrugUnits","NumKindsDrugsSeiz","PolicAveOTWorked","LandArea","PopDens","PctUsePubTrans","PolicCars","PolicOperBudg","LemasPctPolicOnPatr","LemasGangUnitDeploy","LemasPctOfficDrugUn","PolicBudgPerPop","ViolentCrimesPerPop"];

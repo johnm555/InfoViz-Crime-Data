@@ -13,6 +13,7 @@ var zoomscale = function(width,height){
 }; 
 var scale = zoomscale(w,h);
 
+//Color ranges from 0 to 1 yielding a color between the min max specified
 var crange = pv.Scale.linear(0, .6, 1).range("#FAF8CC", "red", "#660000");
 //var crange = pv.Scale.linear(0, 1).range("#FF9999", "red");
 var cdotrange = pv.Scale.linear(0, .4, 1).range("#E0FFFF", "blue", "#151B54");
@@ -50,6 +51,8 @@ var filters = {
     }
 }
 
+//Sets up filters, processes data, and creates the visualization
+
 function setupMap(){
     initFilters();
     processData();
@@ -74,11 +77,13 @@ function processData(){
     });
 }
 
+//Summarizes the state crime per state based on the visible cities crime data
+//This is the value that provides the color for each state.
 function calculateStateCrime(){
     // Find the average violent crimes for each state, used in state's color
     statecrime = [];
     vcdata.forEach(function(item){
-        if (testWithFilters(item)){
+        if (testWithFilters(item)){//Determine if it should be visible or not
             var vc = parseFloat(item.ViolentCrimesPerPop);
             var state = item.state-1;
             if (statecrime[state]){
@@ -91,6 +96,7 @@ function calculateStateCrime(){
     });
 }
 
+//Find min and max for value of each filter
 function initFilters(){
     for (var i=0;i<vcdata.length;i++){
         var d = vcdata[i];
@@ -142,6 +148,7 @@ function initFilters(){
 	
 	
 }   
+//Returns true if an item should be visible based on each filter
 function testWithFilters(c){
     for (var f in filters){
         if (!filters[f].includes(c))
@@ -149,6 +156,7 @@ function testWithFilters(c){
     }
     return true;
 }
+//Returns a color between the min and max colors of the state's background color range
 function normalFillStyle(d, l, c) {
     var sc = statecrime[states.indexOf(c.name)];
     if (sc){
@@ -158,6 +166,7 @@ function normalFillStyle(d, l, c) {
         return crange(0);
     }
 }
+//Adds states, draws dots
 function createVisualization(){
     // Add the main panel
    var vis;
@@ -212,6 +221,7 @@ function createVisualization(){
         .textAlign("left")
         .text(function(d) {return d + "%"});
         
+    //add some labels
     vis.add(pv.Label)
         .bottom(keydat.length*12)
         .left(5)
@@ -230,6 +240,7 @@ function createVisualization(){
     vis.render();
 }
 
+//Find the min/max x and y of the state, used for zooming
 function computeBounds(borders, scalers){
     var bnds = {minx: Number.MAX_VALUE, miny: Number.MAX_VALUE, maxx: 0, maxy: 0}
     for (var i=0;i<borders.length;i++){
@@ -248,6 +259,7 @@ function computeBounds(borders, scalers){
     return bnds;
 }
 
+//Toggle fading background, find offset and bounds, animate state
 function zoomState(statedata){
     console.log("zooooom: "+statedata);
 
@@ -268,24 +280,12 @@ function zoomState(statedata){
     var offsetx=w/2-(bnds.maxx-bnds.minx)/2-bnds.minx;
     var offsety=h/2-(bnds.maxy-bnds.miny)/2-bnds.miny;
     
-    //console.log("scaler: "+zsc+" - "+zsc.x);
-    
-
     var ovis = new pv.Panel().canvas("overlay")
         .width(w)
         .height(h)
         .top(30)
         .bottom(20);
     
-    /*
-    zoomed = addState(ovis,[statedata],zsc, offsetx, offsety,
-        function(){
-            return "gray";
-        },
-        function(c){
-            console.log("Namee: "+c.name+" idx: "+states.indexOf(c.name));
-        });
-    */
     zoomed = animateState(ovis,[statedata], offsetx, offsety,
         normalFillStyle,
         function(c){
@@ -296,6 +296,7 @@ function zoomState(statedata){
             ovis.render();
         });
 }
+//Hide background, clear out state variables indicating state
 function hideoverlay(){
     $("#overlay").empty();
     $("#overlay-container").fadeOut('fast');
@@ -303,6 +304,7 @@ function hideoverlay(){
     zoomedidx = -2;
     selectedcity = "";
 }
+
 function drawCloseButton(ovis,bnds,offsetx,offsety){
     //Draw close button
     var closesize=150,closesize2=15;
@@ -314,6 +316,7 @@ function drawCloseButton(ovis,bnds,offsetx,offsety){
         .fillStyle(function(){return "orange";})
         .strokeStyle("white")
         .event("click",hideoverlay).add(pv.Line)
+        //Add X lines to indicate close button, attach click even to those as well
             .data([[bnds.minx+offsetx-closesize2/2,bnds.miny+offsety-closesize2/2],
                    [bnds.minx+offsetx+closesize2/2,bnds.miny+offsety+closesize2/2]])
             .top(function(d) {return d[1]})
@@ -326,6 +329,13 @@ function drawCloseButton(ovis,bnds,offsetx,offsety){
             .left(function(d) {return d[0]})
             .event("click",hideoverlay);
 }
+/*
+Custom state animation.
+Starts new state at original position on the map, slowly magnifies the state
+and zooms it at double the size in the middle of the map.
+Also enables the library's zooming feature to zoom and pan the individual state
+-This was more efficient than zooming all the states in the entire map
+*/
 function animateState(rootvis, data, endoffsetx, endoffsety, fill,onclick,callback){
     var scaler, offsetx=0, offsety=0;
     
@@ -413,7 +423,8 @@ function animateState(rootvis, data, endoffsetx, endoffsety, fill,onclick,callba
     return state;
 }
 
-
+//Used to add all sstates to the map or to add the zoomed state
+//Data is an array of state borders containing start and end lat,lng coordinates
 function addState(rootvis, data, scaler, offsetx, offsety, fill,onclick){
 
     // Add a panel for each state

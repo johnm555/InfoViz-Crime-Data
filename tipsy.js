@@ -23,7 +23,6 @@ pv.Behavior.tipsy = function(opts) {
   }
 
   return function(d) {
-    console.log("tipsy");
       /* Compute the transform to offset the tooltip position. */
       var t = pv.Transform.identity, p = this.parent;
       do {

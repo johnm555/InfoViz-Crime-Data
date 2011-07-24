@@ -8,24 +8,35 @@
   #map_canvas { height: 100% }
 </style>
 <link type="text/css" rel="stylesheet" href="map.css"/>
+<!-- Third party libraries -->
 <script type="text/javascript" src="protovis-d3.2.js"></script>
 <script type="text/javascript" src="centroid.js"></script>
+<!-- Used for state boundries drawn onto the map -->
 <script type="text/javascript" src="us_lowres.js"></script>
 <script type="text/javascript" src="us_stats.js"></script>
+<!-- Our data from the uci machine learning repository -->
 <script type="text/javascript" src="data.js"></script>
+<!-- jQuery javascript library -->
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 <link type="text/css" href="jqueryui/css/ui-lightness/jquery-ui-1.8.14.custom.css" rel="Stylesheet" />	
-<!--<script type="text/javascript" src="jqueryui/js/jquery-1.5.1.min.js"></script>-->
 <script type="text/javascript" src="jqueryui/js/jquery-ui-1.8.14.custom.min.js"></script>
 <script type='text/javascript' src='javascripts/jquery.tipsy.js'></script>
-<link rel="stylesheet" href="stylesheets/tipsy.css" type="text/css" />
+
+<!-- Mostly used to add lat, lng information to the data -->
 <script type="text/javascript"
     src="http://maps.google.com/maps/api/js?sensor=false"></script>
-
+    
+<!-- For tooltips -->
+<link rel="stylesheet" href="stylesheets/tipsy.css" type="text/css" />
 <script src="tipsy.js"></script>
-<script src="map.js"></script>
-<script src="dod.js"></script>
 <link href="tipsy.css" type="text/css" rel="stylesheet"/>
+
+<!-- Custom code written by John Marshall-->
+<script src="map.js"></script>
+<!-- Custom code written by Matt Rubin -->
+<!-- DOD = Details on Demand -->
+<script src="dod.js"></script>
+
 <title>Crime in the USA</title>
 </head>
 <body onload="initialize()">
@@ -45,6 +56,7 @@
   <div id="viscontainer">
       <div id="mapcontainer">
           <div id="fig">
+            <!-- Custom code written by John Marshall -->
             <script type="text/javascript" src="mapview.js">
         
         
