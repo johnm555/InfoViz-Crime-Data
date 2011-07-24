@@ -9,3 +9,15 @@
 	width: 250px;
 	height: 150px;
 }
+
+#pie2
+{
+    width: 250px;
+    height: 150px;
+}
+#dod-container{
+    overflow: scroll;
+    float: left;
+    width: 310px;
+    /*height: 600px;*/
+}

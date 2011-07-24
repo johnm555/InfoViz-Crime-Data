@@ -7,8 +7,9 @@
     width: 300px;
     background-color: gray;
     float: left;
-    height: 600px;
+    height: 900px;
     display: none;
+    
 }
 #container {
   height: 10px;
@@ -50,7 +51,7 @@
     position: absolute;
     top: 0px; left: 0px;
     width: 1000px;
-    height: 600px;
+    height: 900px;
 }
 #overlay-shade{
     z-index: 2;
@@ -58,4 +59,10 @@
 }
 #overlay{
     z-index: 3;
+}
+#filters{
+    z-index: 60;
+}
+#viscontainer{
+
 }

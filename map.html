@@ -14,18 +14,22 @@
 <script type="text/javascript" src="us_stats.js"></script>
 <script type="text/javascript" src="data.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-<script type="text/javascript"
-    src="http://maps.google.com/maps/api/js?sensor=false"></script>
-
-<script src="map.js"></script>
-<script src="dod.js"></script>
-
 <link type="text/css" href="jqueryui/css/ui-lightness/jquery-ui-1.8.14.custom.css" rel="Stylesheet" />	
 <!--<script type="text/javascript" src="jqueryui/js/jquery-1.5.1.min.js"></script>-->
 <script type="text/javascript" src="jqueryui/js/jquery-ui-1.8.14.custom.min.js"></script>
+<script type='text/javascript' src='javascripts/jquery.tipsy.js'></script>
+<link rel="stylesheet" href="stylesheets/tipsy.css" type="text/css" />
+<script type="text/javascript"
+    src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+<script src="tipsy.js"></script>
+<script src="map.js"></script>
+<script src="dod.js"></script>
+<link href="tipsy.css" type="text/css" rel="stylesheet"/>
+<title>Crime in the USA</title>
 </head>
 <body onload="initialize()">
-    This is the infoviz project
+    Crime in the USA
   <div id="filters">
     <span class="filter">
         <label for="medinc">Medium Income:</label>
@@ -47,12 +51,18 @@
             </script>
           </div>
       </div>
-      <div id="dod">
-        <h1 class="city-state"></h1>
-        <h3>Ethnical Distribution by Percent</h3>
-        <div id="pie1"></div>
-        <h3>Sample Bar Graph</h3>
-		<div id="bar1"></div>
+      <div id="dod-container">
+          <div id="dod">
+            <h1 class="city-state"></h1>
+            <p>Crime rate: <span class="crime-rate"></span></p>
+            <p>Population: <span class="population"></span></p>
+            <h3>Ethnical Distribution by Percent</h3>
+            <div id="pie1"></div>
+            <h3>Percent Employment</h3>
+            <div id="pie2"></div>
+            <h3>Medium Income by Race</h3>
+            <div id="bar1"></div>
+          </div>
       </div>
   </div>
   <div id="overlay-container">

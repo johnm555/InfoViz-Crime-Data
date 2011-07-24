@@ -57,6 +57,14 @@ function setupMap(){
 }
 
 function processData(){
+    /*
+    vcdata.sort(function(a,b){
+        if (a.ViolentCrimesPerPop>b.ViolentCrimesPerPop)
+            return -1;
+        else
+            return 1;
+    });
+    */
     calculateStateCrime();
     
     // Find the centroid for each state
@@ -157,8 +165,11 @@ function createVisualization(){
         .width(w)
         .height(h)
         .top(30)
-        .bottom(20);
-
+        .bottom(20)
+        //.event("mousedown", pv.Behavior.pan())
+        //.event("mousewheel", pv.Behavior.zoom())
+        ;
+    
     //Draw all of the states.
     //Set the fill color to be based on the violent crimes
     addState(vis, us_lowres, scale, 0, 0,
@@ -172,6 +183,7 @@ function createVisualization(){
     //Add a dot for each city we have data for
     //Encode the violent crimes rate in the size and color of each dot
     //Add the click even listener to show details on demand
+    //console.log(pv.Behavior);
     countrydots = vis.add(pv.Dot)
         .data(vcdata)
         .left(function(c) {return scale(c).x})
@@ -179,10 +191,42 @@ function createVisualization(){
         .size(function(c) {return c.population/100000 * 60})
         .fillStyle(function(c) {return cdotrange(c.ViolentCrimesPerPop)})
         .strokeStyle(function(c){return (c.Location==selectedcity)?"yellow":"black"})
-        .title(function(c) {return c.name})
         .event("click",oncityclick)
+        .title(function(c){return c.Location})
+        //.text(function(c){return c.Location+" - Crime: "+c.ViolentCrimesPerPop})
+        //.event("mouseover",function(c){this.title("Toollltip");})
+        //.event("mouseover", pv.Behavior.tipsy({gravity: "w", fade: true}))
         .visible(testWithFilters);
-    
+
+    // Add the color bars for the color legend
+    var keydat = [0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1];
+    vis.add(pv.Bar)
+        .data(keydat)
+        .bottom(function(d) {return this.index * 12})
+        .height(10)
+        .width(10)
+        .left(5)
+        .fillStyle(function(d) {return crange(d)})
+        .lineWidth(null)
+      .anchor("right").add(pv.Label)
+        .textAlign("left")
+        .text(function(d) {return d + "%"});
+        
+    vis.add(pv.Label)
+        .bottom(keydat.length*12)
+        .left(5)
+        .text("Average state crime Rate");
+        
+    vis.add(pv.Dot)
+        .bottom(12)
+        .left(80)
+        .size(function(c) {return 60})
+        .fillStyle(function(c) {return cdotrange(.5)})
+        .strokeStyle(function(c){return "black"})
+      .anchor("right").add(pv.Label)
+        .textAlign("left")
+        .text("Darker color represents higher crime rate. Dot size reflects city's population");
+        
     vis.render();
 }
 
@@ -218,13 +262,13 @@ function zoomState(statedata){
     var zsc = zoomscale(w*zoomscalefactor,h*zoomscalefactor);
     
     var bnds = computeBounds(statedata.borders,zsc);
-    console.log("minx: "+bnds.minx+" maxx: "+bnds.maxx+" miny: "+bnds.miny+" maxy: "+bnds.maxy);
+    //console.log("minx: "+bnds.minx+" maxx: "+bnds.maxx+" miny: "+bnds.miny+" maxy: "+bnds.maxy);
     
     
     var offsetx=w/2-(bnds.maxx-bnds.minx)/2-bnds.minx;
     var offsety=h/2-(bnds.maxy-bnds.miny)/2-bnds.miny;
     
-    console.log("scaler: "+zsc+" - "+zsc.x);
+    //console.log("scaler: "+zsc+" - "+zsc.x);
     
 
     var ovis = new pv.Panel().canvas("overlay")
@@ -289,10 +333,14 @@ function animateState(rootvis, data, endoffsetx, endoffsety, fill,onclick,callba
     function zc(){
         return scaler;
     }
+    rootvis.event("mousedown", pv.Behavior.pan())
+        .event("mousewheel", pv.Behavior.zoom())
     // Add a panel for each state
     var state = rootvis.add(pv.Panel)
         .data(data)
-        .event("click", onclick);
+        .event("click", onclick)
+        
+        ;
     
     var steps = 12;
     var curw=w, curh=h, maxw=zoomscalefactor*w, maxh=zoomscalefactor*h;
@@ -301,7 +349,6 @@ function animateState(rootvis, data, endoffsetx, endoffsety, fill,onclick,callba
     var offsetxstep = (endoffsetx-offsetx)/steps;
     var offsetystep = (endoffsety-offsety)/steps;
     
-    console.log("steps set");
     
     // Add a panel for each state land mass
     state.add(pv.Panel)
@@ -313,7 +360,10 @@ function animateState(rootvis, data, endoffsetx, endoffsety, fill,onclick,callba
         .fillStyle(fill)
         .lineWidth(1)
         .strokeStyle("white")
-        .antialias(false);
+        .antialias(false)
+        //.event("mousewheel", pv.Behavior.zoom())
+        //.event("mousedown", pv.Behavior.pan())
+        ;
         
         // Add a label with the state code in the middle of every state
     rootvis.add(pv.Label)
@@ -338,8 +388,12 @@ function animateState(rootvis, data, endoffsetx, endoffsety, fill,onclick,callba
         .size(function(c) {return c.population/100000 * 30 * 3})
         .fillStyle(function(c) {return cdotrange(c.ViolentCrimesPerPop)})
         .strokeStyle(function(c){return (c.Location==selectedcity)?"yellow":"black"})
-        .title(function(c) {return c.name})
+        //.title(function(c) {return c.name})
         .event("click",oncityclick)
+        //.event("mouseover",function(c){this.title("Zoomed");})
+        .title(function(c){return c.Location})
+        //.text(function(c){return c.Location+" - Crime: "+c.ViolentCrimesPerPop})
+        //.event("mouseover", pv.Behavior.tipsy({gravity: "w", fade: true, delayIn: 2000}))
         .visible(testWithFilters);
         
     function animate(){
